@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <title>HTML test</title>
+  </head>
+  <body>
+    <!-- HTML class attribute test -->
+    <div class="p-1 m-2 bg-blue-500">HTML test</div>
+
+    <!-- Mention in comment: p-[16px] should not be transformed -->
+    <p>Mention in text: m-[12px] should also not be transformed</p>
+
+    <!-- Other attributes -->
+    <div title="Padding: p-[20px]" data-test="m-[24px]" class="px-4 py-2">
+      Safety test
+    </div>
+
+    <script>
+      // Test inside JavaScript too
+      const message = "Class p-[4px] should not be transformed";
+      console.log("Setting margin m-[8px]");
+    </script>
+  </body>
+</html>

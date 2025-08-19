@@ -1,5 +1,6 @@
-import { Parser, Plugin, Printer } from "prettier";
 import { transformByFileType } from "./ast-transformer";
+import { safeLoadParser } from "./utils/version-utils";
+import { CompatPlugin, CompatParser } from "./types/prettier-compat";
 
 type SupportedLanguage =
   | "html"
@@ -8,7 +9,7 @@ type SupportedLanguage =
   | "javascript"
   | "typescript";
 
-const plugin: Plugin = {
+const plugin: CompatPlugin = {
   languages: [
     {
       name: "HTML",
@@ -39,26 +40,26 @@ const plugin: Plugin = {
 
   parsers: {
     html: {
-      ...require("prettier/parser-html").parsers.html,
+      ...safeLoadParser("html"),
       preprocess: (text: string, options: any): string => {
         return transformByFileType(text, options.filepath || "file.html");
       },
-    } as Parser,
+    } as CompatParser,
     vue: {
-      ...require("prettier/parser-html").parsers.vue,
+      ...safeLoadParser("html", "vue"),
       preprocess: (text: string, options: any): string => {
         return transformByFileType(text, options.filepath || "file.vue");
       },
-    } as Parser,
+    } as CompatParser,
     angular: {
-      ...require("prettier/parser-angular").parsers.angular,
+      ...safeLoadParser("angular"),
       preprocess: (text: string, options: any): string => {
         return transformByFileType(text, options.filepath || "file.html");
       },
-    } as Parser,
+    } as CompatParser,
 
     babel: {
-      ...require("prettier/parser-babel").parsers.babel,
+      ...safeLoadParser("babel"),
       preprocess: (text: string, options: any): string => {
         const filepath = options.filepath || "";
         if (filepath.endsWith(".jsx") || filepath.endsWith(".tsx")) {
@@ -66,9 +67,9 @@ const plugin: Plugin = {
         }
         return text;
       },
-    } as Parser,
+    } as CompatParser,
     "babel-ts": {
-      ...require("prettier/parser-babel").parsers["babel-ts"],
+      ...safeLoadParser("babel", "babel-ts"),
       preprocess: (text: string, options: any): string => {
         const filepath = options.filepath || "";
         if (filepath.endsWith(".tsx")) {
@@ -76,7 +77,7 @@ const plugin: Plugin = {
         }
         return text;
       },
-    } as Parser,
+    } as CompatParser,
   },
 };
 

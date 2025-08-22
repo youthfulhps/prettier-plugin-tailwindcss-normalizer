@@ -1,0 +1,163 @@
+name: Test Deploy to GitHub Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_suffix:
+        description: "Test version suffix (e.g., alpha.1, beta.2)"
+        required: true
+        default: "alpha.1"
+        type: string
+      dry_run:
+        description: "Dry run (don't actually publish)"
+        type: boolean
+        default: false
+
+jobs:
+  test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@${{ github.repository_owner }}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Build project
+        run: npm run build
+
+      - name: Verify build outputs
+        run: |
+          if [ ! -f "dist/index.js" ]; then
+            echo "❌ Built index.js file not found!"
+            exit 1
+          fi
+          if [ ! -f "dist/index.d.ts" ]; then
+            echo "❌ Built type definition file not found!"
+            exit 1
+          fi
+          echo "✅ Build verification completed!"
+
+      - name: Create test package.json
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          TEST_VERSION="${CURRENT_VERSION}-${{ github.event.inputs.version_suffix }}"
+
+          # Create package.json for GitHub Packages
+          jq --arg name "@${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer" \
+             --arg version "$TEST_VERSION" \
+             --arg repo "git+https://github.com/${{ github.repository }}.git" \
+             '.name = $name | .version = $version | .repository.url = $repo' \
+             package.json > package-gh.json
+
+          mv package-gh.json package.json
+
+          echo "TEST_VERSION=$TEST_VERSION" >> $GITHUB_ENV
+          echo "📦 Test package: @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@$TEST_VERSION"
+
+      - name: Dry run check
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "🔍 === DRY RUN MODE ==="
+          echo "📦 Package name: @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer"
+          echo "🏷️  Version: ${{ env.TEST_VERSION }}"
+          echo "📋 Package.json contents:"
+          cat package.json
+          echo ""
+          echo "🚀 Actual deployment was not performed."
+          npm publish --dry-run
+
+      - name: Publish to GitHub Packages
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          echo "🚀 Publishing test package to GitHub Packages..."
+          echo "📦 @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}"
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create installation guide
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          cat << 'EOF' > INSTALL_GUIDE.md
+          # 🧪 Test Package Installation Guide
+
+          ## 1. GitHub Packages Authentication Setup
+
+          Create a `.npmrc` file in your project root:
+          ```
+          @${{ github.repository_owner }}:registry=https://npm.pkg.github.com
+          //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+          ```
+
+          ## 2. Generate GitHub Personal Access Token
+
+          1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+          2. Click "Generate new token (classic)"
+          3. Select permissions: `read:packages`
+          4. Copy the token and set it as an environment variable:
+          ```bash
+          export GITHUB_TOKEN=your_token_here
+          ```
+
+          ## 3. Install Test Package
+          ```bash
+          npm install @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}
+          ```
+
+          ## 4. Add to Prettier Configuration
+          ```json
+          {
+            "plugins": ["@${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer"]
+          }
+          ```
+
+          ## 5. Usage Example
+          ```jsx
+          // Before
+          <div className="w-[384px] h-[256px] p-[16px]" />
+
+          // After (formatted with Prettier)
+          <div className="w-sm h-64 p-4" />
+          ```
+
+          ---
+          📅 Deploy time: $(date)
+          🏷️  Version: ${{ env.TEST_VERSION }}
+          🔗 Repository: https://github.com/${{ github.repository }}
+          EOF
+
+          echo "📝 Installation guide has been created:"
+          cat INSTALL_GUIDE.md
+
+      - name: Upload installation guide
+        if: github.event.inputs.dry_run != 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: installation-guide
+          path: INSTALL_GUIDE.md
+
+      - name: Notify success
+        if: success() && github.event.inputs.dry_run != 'true'
+        run: |
+          echo "🎉 Test package deployment completed successfully!"
+          echo "📦 Package: @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}"
+          echo "🔗 GitHub Packages: https://github.com/${{ github.repository }}/packages"
+          echo ""
+          echo "📋 Download 'installation-guide' from Artifacts for installation instructions!"

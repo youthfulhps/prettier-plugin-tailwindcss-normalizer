@@ -1,0 +1,201 @@
+name: Generate Local Test Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_method:
+        description: "Select test method"
+        required: true
+        default: "npm-pack"
+        type: choice
+        options:
+          - npm-pack
+          - tarball
+          - both
+
+jobs:
+  local-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Verify build
+        run: |
+          echo "✅ Built files:"
+          ls -la dist/
+
+      - name: Create test package
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          TEST_VERSION="${CURRENT_VERSION}-local.$(date +%Y%m%d%H%M%S)"
+
+          # Update to test version
+          npm version $TEST_VERSION --no-git-tag-version
+
+          echo "TEST_VERSION=$TEST_VERSION" >> $GITHUB_ENV
+          echo "📦 Test version: $TEST_VERSION"
+
+      - name: Generate npm pack
+        if: github.event.inputs.test_method == 'npm-pack' || github.event.inputs.test_method == 'both'
+        run: |
+          echo "📦 Generating npm pack file..."
+          npm pack
+          PACK_FILE=$(ls *.tgz)
+          echo "PACK_FILE=$PACK_FILE" >> $GITHUB_ENV
+          echo "✅ Generated pack file: $PACK_FILE"
+
+      - name: Generate tarball
+        if: github.event.inputs.test_method == 'tarball' || github.event.inputs.test_method == 'both'
+        run: |
+          echo "📦 Generating tarball..."
+          tar -czf "prettier-plugin-tailwindcss-normalizer-${{ env.TEST_VERSION }}.tar.gz" \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude="*.tgz" \
+            --exclude=coverage \
+            --exclude=.github \
+            .
+          TARBALL_FILE="prettier-plugin-tailwindcss-normalizer-${{ env.TEST_VERSION }}.tar.gz"
+          echo "TARBALL_FILE=$TARBALL_FILE" >> $GITHUB_ENV
+          echo "✅ Generated tarball: $TARBALL_FILE"
+
+      - name: Create test guide
+        run: |
+          cat << 'EOF' > LOCAL_TEST_GUIDE.md
+          # 🧪 Local Test Guide
+
+          ## Method 1: Using npm pack file (Recommended)
+
+          ### Step 1: Download file
+          - Download `${{ env.PACK_FILE }}` from GitHub Actions Artifacts
+
+          ### Step 2: Install in test project
+          ```bash
+          # Navigate to your test project
+          cd your-test-project
+
+          # Install using downloaded pack file
+          npm install /path/to/${{ env.PACK_FILE }}
+          ```
+
+          ### Step 3: Configure Prettier
+          `.prettierrc.json`:
+          ```json
+          {
+            "plugins": ["prettier-plugin-tailwindcss-normalizer"]
+          }
+          ```
+
+          ## Method 2: Using npm link
+
+          ### Step 1: In plugin project
+          ```bash
+          cd prettier-plugin-tailwindcss-normalizer
+          npm run build
+          npm link
+          ```
+
+          ### Step 2: In test project
+          ```bash
+          cd your-test-project
+          npm link prettier-plugin-tailwindcss-normalizer
+          ```
+
+          ## Method 3: Direct path configuration
+
+          `.prettierrc.json`:
+          ```json
+          {
+            "plugins": ["/absolute/path/to/prettier-plugin-tailwindcss-normalizer/dist"]
+          }
+          ```
+
+          ## Testing Instructions
+
+          ### 1. Create test file
+          `test.jsx`:
+          ```jsx
+          const MyComponent = () => {
+            return (
+              <div className="w-[384px] h-[256px] p-[16px] m-[24px] text-[18px]">
+                <span className="bg-[#ff0000] border-[2px]">Test</span>
+              </div>
+            );
+          };
+          ```
+
+          ### 2. Run Prettier
+          ```bash
+          npx prettier --write test.jsx
+          ```
+
+          ### 3. Check results
+          ```jsx
+          const MyComponent = () => {
+            return (
+              <div className="w-sm h-64 p-4 m-6 text-lg">
+                <span className="bg-[#ff0000] border-2">Test</span>
+              </div>
+            );
+          };
+          ```
+
+          ## Troubleshooting
+
+          ### When Prettier can't find the plugin
+          ```bash
+          # Clear prettier cache
+          rm -rf node_modules/.cache/prettier
+
+          # Restart prettier (VSCode)
+          # Command Palette → "Reload Window"
+          ```
+
+          ### When plugin doesn't work
+          1. Check if `dist/` folder exists
+          2. Rebuild with `npm run build`
+          3. Verify prettier configuration file
+
+          ---
+          📅 Generated at: $(date)
+          🏷️  Test version: ${{ env.TEST_VERSION }}
+          EOF
+
+          echo "📝 Local test guide has been created!"
+
+      - name: Upload test files
+        uses: actions/upload-artifact@v3
+        with:
+          name: local-test-package-${{ env.TEST_VERSION }}
+          path: |
+            LOCAL_TEST_GUIDE.md
+            *.tgz
+            *.tar.gz
+
+      - name: Summary
+        run: |
+          echo "🎉 Local test package is ready!"
+          echo "📦 Version: ${{ env.TEST_VERSION }}"
+          echo "📋 Download: Artifacts → 'local-test-package-${{ env.TEST_VERSION }}'"
+          echo ""
+          echo "🚀 Usage:"
+          echo "1. Download files from Artifacts"
+          echo "2. Follow instructions in LOCAL_TEST_GUIDE.md"
+          echo "3. Run Prettier in your test project"

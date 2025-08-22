@@ -15,7 +15,16 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run test && npm run lint && npm run build",
+    "release:patch": "npm version patch && git push origin main --tags",
+    "release:minor": "npm version minor && git push origin main --tags",
+    "release:major": "npm version major && git push origin main --tags",
+    "release:dry": "npm publish --dry-run",
+    "clean": "rm -rf dist coverage",
+    "test:local": "npm run build && npm pack && echo '✅ Local test package created! Use the .tgz file to test in other projects.'",
+    "test:install": "npm run test:local && npm install -g $(ls *.tgz | head -1) && echo '✅ Global installation completed!'",
+    "test:link": "npm run build && npm link && echo '✅ npm link completed! Run npm link prettier-plugin-tailwindcss-normalizer in other projects.'"
   },
   "keywords": [
     "prettier",

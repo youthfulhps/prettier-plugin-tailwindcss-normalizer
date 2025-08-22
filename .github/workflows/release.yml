@@ -1,0 +1,131 @@
+name: Release to NPM
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: 'Dry run (don't actually publish)'
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Build project
+        run: npm run build
+
+      - name: Verify build outputs
+        run: |
+          if [ ! -f "dist/index.js" ]; then
+            echo "빌드된 index.js 파일이 없습니다!"
+            exit 1
+          fi
+          if [ ! -f "dist/index.d.ts" ]; then
+            echo "빌드된 타입 정의 파일이 없습니다!"
+            exit 1
+          fi
+          echo "빌드 검증이 완료되었습니다!"
+
+      # 수동 워크플로우 실행 시 버전 업데이트
+      - name: Update version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          npm version ${{ github.event.inputs.release_type }} --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to v$NEW_VERSION"
+          git tag "v$NEW_VERSION"
+          git push origin main --tags
+
+      - name: Get release version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=v${{ env.NEW_VERSION }}" >> $GITHUB_ENV
+          fi
+
+      - name: Dry run publish
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "=== DRY RUN 모드 ==="
+          echo "다음 버전으로 배포될 예정입니다: ${{ env.VERSION }}"
+          npm publish --dry-run
+          echo "실제 배포는 수행되지 않았습니다."
+
+      - name: Publish to NPM
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          echo "NPM에 버전 ${{ env.VERSION }}을(를) 배포합니다..."
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release (for manual workflow)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run != 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.NEW_VERSION }}
+          name: Release v${{ env.NEW_VERSION }}
+          body: |
+            ## 변경사항
+            
+            자동으로 생성된 릴리스입니다.
+            
+            ### 설치 방법
+            ```bash
+            npm install prettier-plugin-tailwindcss-normalizer@${{ env.NEW_VERSION }}
+            ```
+            
+            [전체 변경 로그 보기](https://github.com/${{ github.repository }}/compare/v${{ env.PREVIOUS_VERSION }}...v${{ env.NEW_VERSION }})
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify success
+        if: success() && github.event.inputs.dry_run != 'true'
+        run: |
+          echo "✅ NPM 배포가 성공적으로 완료되었습니다!"
+          echo "📦 패키지: prettier-plugin-tailwindcss-normalizer@${{ env.VERSION }}"
+          echo "🔗 NPM: https://www.npmjs.com/package/prettier-plugin-tailwindcss-normalizer"
+
+

@@ -1,0 +1,67 @@
+# Source files - only include dist
+src/
+*.ts
+!*.d.ts
+
+# Tests
+__tests__/
+*.test.*
+*.spec.*
+coverage/
+
+# Examples and documentation
+examples/
+docs/
+
+# Development files
+.github/
+.vscode/
+.idea/
+*.md
+!README.md
+
+# Config files
+.eslintrc*
+.prettierrc*
+jest.config.*
+tsconfig*.json
+rollup.config.*
+webpack.config.*
+babel.config.*
+
+# Git files
+.gitignore
+.gitattributes
+
+# CI/CD
+.travis.yml
+.circleci/
+appveyor.yml
+
+# Development dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.parcel-cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts not needed in package
+*.tsbuildinfo
+.eslintcache
+
+# Lock files (let users choose their package manager)
+package-lock.json
+yarn.lock
+
+

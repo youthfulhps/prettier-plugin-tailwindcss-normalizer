@@ -70,20 +70,15 @@ export function loadParser(parserName: string) {
 
 export function getParserFromParsers(parsers: any, parserName: string) {
   if (!parsers) {
-    console.warn(`Parsers object is null/undefined for parser: ${parserName}`);
     return {};
   }
 
   if (!parsers[parserName]) {
     if (parserName === "angular" && Object.keys(parsers).length > 0) {
       const firstParser = Object.keys(parsers)[0];
-      console.warn(`Using ${firstParser} parser instead of angular parser`);
       return parsers[firstParser];
     }
 
-    console.warn(
-      `Parser '${parserName}' not found in parsers object. Available parsers: ${Object.keys(parsers).join(", ")}`
-    );
     return {};
   }
 
@@ -96,10 +91,6 @@ export function safeLoadParser(parserName: string, specificParser?: string) {
     const targetParser = specificParser || parserName;
     return getParserFromParsers(parserModule.parsers, targetParser);
   } catch (error) {
-    console.warn(
-      `Failed to load parser ${parserName}/${specificParser || parserName}:`,
-      (error as Error).message
-    );
     return {};
   }
 }

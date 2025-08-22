@@ -8,6 +8,8 @@ export type TailwindMapping = {
   pr?: ValueMapping;
   pb?: ValueMapping;
   pl?: ValueMapping;
+  ps?: ValueMapping;
+  pe?: ValueMapping;
 
   m?: ValueMapping;
   mx?: ValueMapping;
@@ -16,9 +18,12 @@ export type TailwindMapping = {
   mr?: ValueMapping;
   mb?: ValueMapping;
   ml?: ValueMapping;
+  ms?: ValueMapping;
+  me?: ValueMapping;
 
   w?: ValueMapping;
   h?: ValueMapping;
+  size?: ValueMapping;
   "min-w"?: ValueMapping;
   "max-w"?: ValueMapping;
   "min-h"?: ValueMapping;
@@ -29,6 +34,8 @@ export type TailwindMapping = {
   "gap-y"?: ValueMapping;
   "space-x"?: ValueMapping;
   "space-y"?: ValueMapping;
+  "space-x-reverse"?: ValueMapping;
+  "space-y-reverse"?: ValueMapping;
 
   rounded?: ValueMapping;
   "rounded-t"?: ValueMapping;

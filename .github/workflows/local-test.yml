@@ -181,7 +181,7 @@ jobs:
           echo "📝 Local test guide has been created!"
 
       - name: Upload test files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: local-test-package-${{ env.TEST_VERSION }}
           path: |

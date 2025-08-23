@@ -62,6 +62,9 @@
     "type": "git",
     "url": "https://github.com/your-username/prettier-plugin-tailwindcss-normalizer.git"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "bugs": {
     "url": "https://github.com/your-username/prettier-plugin-tailwindcss-normalizer/issues"
   },

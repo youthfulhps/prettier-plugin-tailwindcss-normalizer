@@ -34,7 +34,7 @@ jobs:
       - name: Setup GitHub Packages authentication
         run: |
           echo "🔧 Setting up GitHub Packages authentication..."
-          echo "@${{ github.repository_owner }}:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@youthfulhps:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
           echo "registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "📋 .npmrc file contents:"
@@ -74,7 +74,7 @@ jobs:
           TEST_VERSION="${CURRENT_VERSION}-${{ github.event.inputs.version_suffix }}"
 
           # Create package.json for GitHub Packages with scoped name
-          jq --arg name "@${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer" \
+          jq --arg name "@youthfulhps/prettier-plugin-tailwindcss-normalizer" \
              --arg version "$TEST_VERSION" \
              --arg repo "git+https://github.com/${{ github.repository }}.git" \
              '.name = $name | .version = $version | .repository.url = $repo' \
@@ -83,13 +83,13 @@ jobs:
           mv package-gh.json package.json
 
           echo "TEST_VERSION=$TEST_VERSION" >> $GITHUB_ENV
-          echo "📦 Test package: @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@$TEST_VERSION"
+          echo "📦 Test package: @youthfulhps/prettier-plugin-tailwindcss-normalizer@$TEST_VERSION"
 
       - name: Dry run check
         if: github.event.inputs.dry_run == 'true'
         run: |
           echo "🔍 === DRY RUN MODE ==="
-          echo "📦 Package name: @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer"
+          echo "📦 Package name: @youthfulhps/prettier-plugin-tailwindcss-normalizer"
           echo "🏷️  Version: ${{ env.TEST_VERSION }}"
           echo "📋 Package.json contents:"
           cat package.json
@@ -101,7 +101,7 @@ jobs:
         if: github.event.inputs.dry_run != 'true'
         run: |
           echo "🚀 Publishing test package to GitHub Packages..."
-          echo "📦 @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}"
+          echo "📦 @youthfulhps/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}"
           npm publish --registry=https://npm.pkg.github.com
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -132,13 +132,13 @@ jobs:
 
           ## 3. Install Test Package
           ```bash
-          npm install @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}
+          npm install @youthfulhps/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}
           ```
 
           ## 4. Add to Prettier Configuration
           ```json
           {
-            "plugins": ["@${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer"]
+            "plugins": ["@youthfulhps/prettier-plugin-tailwindcss-normalizer"]
           }
           ```
 
@@ -171,7 +171,7 @@ jobs:
         if: success() && github.event.inputs.dry_run != 'true'
         run: |
           echo "🎉 Test package deployment completed successfully!"
-          echo "📦 Package: @${{ github.repository_owner }}/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}"
+          echo "📦 Package: @youthfulhps/prettier-plugin-tailwindcss-normalizer@${{ env.TEST_VERSION }}"
           echo "🔗 GitHub Packages: https://github.com/${{ github.repository }}/packages"
           echo ""
           echo "📋 Download 'installation-guide' from Artifacts for installation instructions!"

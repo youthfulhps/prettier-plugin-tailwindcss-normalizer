@@ -1,5 +1,5 @@
 {
-  "name": "prettier-plugin-tailwindcss-normalizer",
+  "name": "@youthfulhps/prettier-plugin-tailwindcss-normalizer",
   "version": "0.2.0",
   "description": "A Prettier plugin that normalizes Tailwind CSS arbitrary values into standard utility classes.",
   "main": "dist/index.js",
@@ -60,13 +60,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/prettier-plugin-tailwindcss-normalizer.git"
+    "url": "https://github.com/youthfulhps/prettier-plugin-tailwindcss-normalizer.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "bugs": {
-    "url": "https://github.com/your-username/prettier-plugin-tailwindcss-normalizer/issues"
+    "url": "https://github.com/youthfulhps/prettier-plugin-tailwindcss-normalizer/issues"
   },
-  "homepage": "https://github.com/your-username/prettier-plugin-tailwindcss-normalizer#readme"
+  "homepage": "https://github.com/youthfulhps/prettier-plugin-tailwindcss-normalizer#readme"
 }

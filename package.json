@@ -1,5 +1,5 @@
 {
-  "name": "@youthfulhps/prettier-plugin-tailwindcss-normalizer",
+  "name": "prettier-plugin-tailwindcss-normalizer",
   "version": "0.2.0",
   "description": "A Prettier plugin that normalizes Tailwind CSS arbitrary values into standard utility classes.",
   "main": "dist/index.js",

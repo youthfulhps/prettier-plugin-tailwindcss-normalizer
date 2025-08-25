@@ -63,7 +63,8 @@
     "url": "https://github.com/youthfulhps/prettier-plugin-tailwindcss-normalizer.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "@youthfulhps:registry": "https://npm.pkg.github.com"
   },
   "bugs": {
     "url": "https://github.com/youthfulhps/prettier-plugin-tailwindcss-normalizer/issues"

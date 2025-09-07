@@ -91,7 +91,7 @@ jobs:
         if: github.event.inputs.dry_run != 'true'
         run: |
           echo "NPM에 버전 ${{ env.VERSION }}을(를) 배포합니다..."
-          npm publish
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

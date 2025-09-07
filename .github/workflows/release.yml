@@ -6,23 +6,22 @@ on:
   workflow_dispatch:
     inputs:
       release_type:
-        description: 'Release type'
+        description: "Release type"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
           - patch
           - minor
           - major
       dry_run:
-        description: 'Dry run (don't actually publish)'
         type: boolean
         default: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,8 +32,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci
@@ -104,14 +103,14 @@ jobs:
           name: Release v${{ env.NEW_VERSION }}
           body: |
             ## 변경사항
-            
+
             자동으로 생성된 릴리스입니다.
-            
+
             ### 설치 방법
             ```bash
             npm install prettier-plugin-tailwindcss-normalizer@${{ env.NEW_VERSION }}
             ```
-            
+
             [전체 변경 로그 보기](https://github.com/${{ github.repository }}/compare/v${{ env.PREVIOUS_VERSION }}...v${{ env.NEW_VERSION }})
           draft: false
           prerelease: false
@@ -124,5 +123,3 @@ jobs:
           echo "✅ NPM 배포가 성공적으로 완료되었습니다!"
           echo "📦 패키지: prettier-plugin-tailwindcss-normalizer@${{ env.VERSION }}"
           echo "🔗 NPM: https://www.npmjs.com/package/prettier-plugin-tailwindcss-normalizer"
-
-

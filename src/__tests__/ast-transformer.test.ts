@@ -682,6 +682,8 @@ describe("AST-based transformations", () => {
       `;
 
       const result = transformJSXAST(input);
+
+      expect(result).toContain("text-center font-bold bg-blue-500 hover:bg-blue-600 active:bg-blue-700 focus:ring-[2px] focus:ring-offset-[2px] transition-all duration-[200ms] ease-in-out");
     });
 
     it("should handle unicode and special characters", () => {

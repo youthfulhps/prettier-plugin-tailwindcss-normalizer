@@ -1,53 +1,13 @@
-let prettierVersion: number | null = null;
+// Simplified version check logic since only v3 is supported
 export function getPrettierMajorVersion(): number {
-  if (prettierVersion !== null) {
-    return prettierVersion;
-  }
-
-  try {
-    const prettier = require("prettier");
-
-    if (prettier.version) {
-      const majorVersion = parseInt(prettier.version.split(".")[0]);
-      prettierVersion = majorVersion;
-      return majorVersion;
-    }
-
-    const prettierPackageJson = require("prettier/package.json");
-    if (prettierPackageJson.version) {
-      const majorVersion = parseInt(prettierPackageJson.version.split(".")[0]);
-      prettierVersion = majorVersion;
-      return majorVersion;
-    }
-
-    prettierVersion = 3;
-    return 3;
-  } catch (error) {
-    prettierVersion = 3;
-    return 3;
-  }
-}
-
-export function isPrettierV2(): boolean {
-  return getPrettierMajorVersion() === 2;
-}
-
-export function isPrettierV3Plus(): boolean {
-  return getPrettierMajorVersion() >= 3;
+  return 3;
 }
 
 export function loadParser(parserName: string) {
-  const majorVersion = getPrettierMajorVersion();
-
-  const pathsToTry = [];
-
-  if (majorVersion >= 3) {
-    pathsToTry.push(`prettier/plugins/${parserName}`);
-    pathsToTry.push(`prettier/parser-${parserName}`);
-  } else {
-    pathsToTry.push(`prettier/parser-${parserName}`);
-    pathsToTry.push(`prettier/plugins/${parserName}`);
-  }
+  const pathsToTry = [
+    `prettier/plugins/${parserName}`,
+    `prettier/parser-${parserName}`,
+  ];
 
   let lastError: Error | null = null;
 
@@ -62,7 +22,6 @@ export function loadParser(parserName: string) {
 
   throw new Error(
     `Failed to load parser: ${parserName}. ` +
-      `Prettier version: ${majorVersion}. ` +
       `Tried paths: ${pathsToTry.join(", ")}. ` +
       `Last error: ${lastError?.message}`
   );

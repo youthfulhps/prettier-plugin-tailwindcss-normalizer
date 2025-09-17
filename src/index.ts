@@ -9,6 +9,18 @@ type SupportedLanguage =
   | "javascript"
   | "typescript";
 
+// Parser creation function for v3
+function createParser(parserName: string, fileType: string) {
+  const baseParser = safeLoadParser(parserName, fileType);
+
+  return {
+    ...baseParser,
+    preprocess: (text: string, options: any): string => {
+      return transformByFileType(text, options.filepath || `file.${fileType}`);
+    },
+  } as CompatParser;
+}
+
 const plugin: CompatPlugin = {
   languages: [
     {
@@ -39,43 +51,39 @@ const plugin: CompatPlugin = {
   ],
 
   parsers: {
-    html: {
-      ...safeLoadParser("html"),
-      preprocess: (text: string, options: any): string => {
-        return transformByFileType(text, options.filepath || "file.html");
-      },
-    } as CompatParser,
-    vue: {
-      ...safeLoadParser("html", "vue"),
-      preprocess: (text: string, options: any): string => {
-        return transformByFileType(text, options.filepath || "file.vue");
-      },
-    } as CompatParser,
-    angular: {
-      ...safeLoadParser("angular"),
-      preprocess: (text: string, options: any): string => {
-        return transformByFileType(text, options.filepath || "file.html");
-      },
-    } as CompatParser,
-
+    html: createParser("html", "html"),
+    vue: createParser("html", "vue"),
+    angular: createParser("angular", "html"),
     babel: {
-      ...safeLoadParser("babel"),
-      preprocess: (text: string, options: any): string => {
+      ...createParser("babel", "jsx"),
+      // babel parser handles conditionally based on file extension
+      parse: (text: string, options: any) => {
         const filepath = options.filepath || "";
         if (filepath.endsWith(".jsx") || filepath.endsWith(".tsx")) {
-          return transformByFileType(text, filepath);
+          const transformedText = transformByFileType(text, filepath);
+          const baseParser = safeLoadParser("babel");
+          return baseParser.parse
+            ? baseParser.parse(transformedText, options)
+            : text;
         }
-        return text;
+        const baseParser = safeLoadParser("babel");
+        return baseParser.parse ? baseParser.parse(text, options) : text;
       },
     } as CompatParser,
     "babel-ts": {
-      ...safeLoadParser("babel", "babel-ts"),
-      preprocess: (text: string, options: any): string => {
+      ...createParser("babel", "tsx"),
+      // babel-ts parser only processes tsx files
+      parse: (text: string, options: any) => {
         const filepath = options.filepath || "";
         if (filepath.endsWith(".tsx")) {
-          return transformByFileType(text, filepath);
+          const transformedText = transformByFileType(text, filepath);
+          const baseParser = safeLoadParser("babel", "babel-ts");
+          return baseParser.parse
+            ? baseParser.parse(transformedText, options)
+            : text;
         }
-        return text;
+        const baseParser = safeLoadParser("babel", "babel-ts");
+        return baseParser.parse ? baseParser.parse(text, options) : text;
       },
     } as CompatParser,
   },

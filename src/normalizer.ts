@@ -2,7 +2,7 @@ import { TailwindMapping } from "./types";
 import { TAILWIND_MAPPINGS } from "./mappings";
 
 /**
- * 클래스 속성에서 Tailwind arbitrary values를 표준 클래스로 정규화
+ * Normalizes Tailwind arbitrary values to standard classes in class attributes
  */
 export function normalizeClassAttribute(content: string): string {
   let result = content;

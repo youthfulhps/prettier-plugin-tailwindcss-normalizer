@@ -14,7 +14,7 @@ function ComplexComponent() {
    */
 
   return (
-    <div className="min-h-screen p-1 -m-3">
+    <div className="min-h-screen p-1 -m-4 px-1">
       {/* Various patterns */}
       <div
         className={cx(
@@ -28,7 +28,7 @@ function ComplexComponent() {
       {/* Template literal */}
       <div
         className={`w-[200px] h-[100px] border border-gray-300${
-          true ? "p-5" : "p-[10px]"
+          true ? "p-5" : "p-[10px] px-5"
         }`}
       >
         Template literal test

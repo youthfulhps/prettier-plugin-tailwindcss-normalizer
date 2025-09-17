@@ -11,6 +11,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "@youthfulhps/prettier-plugin-tailwindcss-normalizer": "file:../youthfulhps-prettier-plugin-tailwindcss-normalizer-0.3.4.tgz",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-scripts": "5.0.1",
@@ -45,7 +46,8 @@
     "autoprefixer": "^10.4.21",
     "clsx": "^2.1.1",
     "postcss": "^8.5.6",
-    "prettier-plugin-tailwindcss-normalizer": "file:../prettier-plugin-tailwindcss-normalizer-0.2.0.tgz",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss-normalizer": "file:../youthfulhps-prettier-plugin-tailwindcss-normalizer-0.3.4.tgz",
     "tailwindcss": "^4.1.12"
   }
 }

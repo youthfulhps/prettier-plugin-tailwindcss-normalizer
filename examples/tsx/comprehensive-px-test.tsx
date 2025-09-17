@@ -22,7 +22,7 @@ function ComprehensivePxTest() {
       </div>
 
       {/* Sizing px suffix */}
-      <div className="w-4 h-8 min-w-24px max-w-48px min-h-16px max-h-16">
+      <div className="w-4 h-8 min-w-6 max-w-12 min-h-4 max-h-16">
         Sizing: w-16px, h-32px, min-w-24px, max-w-48px, min-h-16px, max-h-64px
       </div>
 

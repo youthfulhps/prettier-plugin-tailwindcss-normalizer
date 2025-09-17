@@ -1,8 +1,6 @@
 /**
- * Prettier 버전별 타입 호환성 정의
+ * Prettier v3 type definitions
  */
-
-// Prettier v2/v3 호환 타입 정의
 export interface CompatParser {
   parse?: (text: string, options: any) => any;
   preprocess?: (text: string, options: any) => string;
@@ -23,7 +21,7 @@ export interface CompatPlugin {
   options?: Record<string, any>;
 }
 
-// 런타임 타입 체크를 위한 유틸리티
+// Runtime type checking utilities
 export function isValidParser(parser: any): parser is CompatParser {
   return parser && typeof parser === "object";
 }

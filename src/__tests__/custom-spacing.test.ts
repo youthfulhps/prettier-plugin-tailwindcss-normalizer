@@ -223,14 +223,6 @@ describe("Custom spacing unit", () => {
     it("should handle a complete component with 8px spacing", () => {
       setPluginOptions({ customSpacingUnit: 8 });
 
-      const input = `
-        <div class="p-[16px] m-[8px] gap-[24px]">
-          <button class="px-[32px] py-[16px] rounded-[8px]">
-            Click me
-          </button>
-        </div>
-      `;
-
       const output = normalizeClassNames("p-[16px] m-[8px] gap-[24px]");
       expect(output).toBe("p-2 m-1 gap-3");
 

@@ -2,20 +2,12 @@ import { transformByFileType } from "./ast-transformer";
 import { safeLoadParser } from "./utils/version-utils";
 import { CompatPlugin, CompatParser } from "./types/prettier-compat";
 
-type SupportedLanguage =
-  | "html"
-  | "vue"
-  | "angular"
-  | "javascript"
-  | "typescript";
-
 // Parser creation function for v3
 function createParser(parserName: string, fileType: string) {
   const baseParser = safeLoadParser(parserName, fileType);
 
   return {
     ...baseParser,
-    astFormat: parserName,
     preprocess: (text: string, options: any): string => {
       return transformByFileType(text, options.filepath || `file.${fileType}`);
     },
@@ -46,51 +38,35 @@ const plugin: CompatPlugin = {
     },
     {
       name: "TypeScript",
-      parsers: ["babel-ts"],
+      parsers: ["typescript"],
       extensions: [".ts", ".tsx"],
     },
   ],
 
   parsers: {
-    html: createParser("html", "html"),
-    vue: createParser("html", "vue"),
-    angular: createParser("angular", "html"),
+    html: {
+      ...createParser("html", "html"),
+      astFormat: "html",
+    },
+    vue: {
+      ...createParser("html", "vue"),
+      astFormat: "vue",
+    },
+    angular: {
+      ...createParser("angular", "html"),
+      astFormat: "html",
+    },
     babel: {
-      ...createParser("babel", "jsx"),
-      // babel parser handles conditionally based on file extension
-      parse: (text: string, options: any) => {
-        const filepath = options.filepath || "";
-        if (filepath.endsWith(".jsx") || filepath.endsWith(".tsx")) {
-          const transformedText = transformByFileType(text, filepath);
-          const baseParser = safeLoadParser("babel");
-          return baseParser.parse
-            ? baseParser.parse(transformedText, options)
-            : text;
-        }
-        const baseParser = safeLoadParser("babel");
-        return baseParser.parse ? baseParser.parse(text, options) : text;
-      },
-    } as CompatParser,
-    "babel-ts": {
-      ...createParser("babel", "tsx"),
-      // babel-ts parser only processes tsx files
-      parse: (text: string, options: any) => {
-        const filepath = options.filepath || "";
-        if (filepath.endsWith(".tsx")) {
-          const transformedText = transformByFileType(text, filepath);
-          const baseParser = safeLoadParser("babel", "babel-ts");
-          return baseParser.parse
-            ? baseParser.parse(transformedText, options)
-            : text;
-        }
-        const baseParser = safeLoadParser("babel", "babel-ts");
-        return baseParser.parse ? baseParser.parse(text, options) : text;
-      },
-    } as CompatParser,
+      ...createParser("babel", "babel"),
+      astFormat: "estree",
+    },
+    typescript: {
+      ...createParser("typescript", "typescript"),
+      astFormat: "estree",
+    },
   },
-
-  printers: {},
 };
 
-module.exports = plugin;
-export default plugin;
+const { parsers, languages } = plugin;
+
+export { parsers, languages };

@@ -45,7 +45,7 @@ Add the plugin to your Prettier configuration:
 
 ```javascript
 module.exports = {
-  plugins: ['@youthfulhps/prettier-plugin-tailwindcss-normalizer'],
+  plugins: ["@youthfulhps/prettier-plugin-tailwindcss-normalizer"],
 };
 ```
 
@@ -59,15 +59,39 @@ npx prettier --write .
 npx prettier --write src/**/*.{tsx,jsx,html,vue}
 ```
 
+## 🔗 Using with Other Prettier Tailwind Plugins
+
+To use this plugin alongside other prettier tailwind plugins, you need to install and configure `prettier-plugin-merge`.
+
+### Installation
+
+```bash
+npm install --save-dev prettier-plugin-merge
+```
+
+### Configuration
+
+In your `.prettierrc.js` file, add `prettier-plugin-merge` as the last item in the plugins array:
+
+```javascript
+module.exports = {
+  plugins: [
+    "@youthfulhps/prettier-plugin-tailwindcss-normalizer",
+    "prettier-plugin-tailwindcss",
+    "prettier-plugin-merge",
+  ],
+};
+```
+
+> **Note**: `prettier-plugin-merge` is a plugin that enables multiple prettier plugins to work together. When using with other tailwind-related plugins, it should always be placed last in the plugins array.
+
 ## 🎯 Examples
 
 ### Before
 
 ```jsx
 <div className="p-[16px] m-[8px] bg-blue-500">
-  <span className="px-[24px] py-[12px] rounded-[6px]">
-    Button
-  </span>
+  <span className="px-[24px] py-[12px] rounded-[6px]">Button</span>
 </div>
 ```
 
@@ -75,9 +99,7 @@ npx prettier --write src/**/*.{tsx,jsx,html,vue}
 
 ```jsx
 <div className="p-4 m-2 bg-blue-500">
-  <span className="px-6 py-3 rounded-md">
-    Button
-  </span>
+  <span className="px-6 py-3 rounded-md">Button</span>
 </div>
 ```
 

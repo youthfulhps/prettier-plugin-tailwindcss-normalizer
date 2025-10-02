@@ -15,6 +15,7 @@ function createParser(parserName: string, fileType: string) {
 
   return {
     ...baseParser,
+    astFormat: parserName,
     preprocess: (text: string, options: any): string => {
       return transformByFileType(text, options.filepath || `file.${fileType}`);
     },
@@ -87,6 +88,8 @@ const plugin: CompatPlugin = {
       },
     } as CompatParser,
   },
+
+  printers: {},
 };
 
 module.exports = plugin;

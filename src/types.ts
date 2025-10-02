@@ -1,5 +1,9 @@
 export type ValueMapping = Record<string, string>;
 
+export interface PluginOptions {
+  customSpacingUnit?: number;
+}
+
 export type TailwindMapping = {
   p?: ValueMapping;
   px?: ValueMapping;

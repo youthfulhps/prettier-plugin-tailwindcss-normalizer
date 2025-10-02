@@ -1,9 +1,24 @@
-import { TailwindMapping } from "./types";
+import { TailwindMapping, PluginOptions } from "./types";
 import { TAILWIND_MAPPINGS } from "./mappings";
+import { generateSpacingMappings } from "./utils/spacing-generator";
 
-/**
- * Normalizes Tailwind arbitrary values to standard classes in class attributes
- */
+let currentMappings: TailwindMapping = TAILWIND_MAPPINGS;
+
+export function setPluginOptions(options: PluginOptions = {}): void {
+  if (options.customSpacingUnit && options.customSpacingUnit !== 4) {
+    const customSpacingMappings = generateSpacingMappings(
+      options.customSpacingUnit
+    );
+
+    currentMappings = {
+      ...TAILWIND_MAPPINGS,
+      ...customSpacingMappings,
+    };
+  } else {
+    currentMappings = TAILWIND_MAPPINGS;
+  }
+}
+
 export function normalizeClassAttribute(content: string): string {
   let result = content;
 
@@ -160,7 +175,7 @@ export function normalizeClassName(className: string): string {
 }
 
 function findStandardMapping(prefix: string, value: string): string | null {
-  const mappings = TAILWIND_MAPPINGS[prefix as keyof TailwindMapping];
+  const mappings = currentMappings[prefix as keyof TailwindMapping];
 
   if (!mappings) {
     return null;

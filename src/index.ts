@@ -1,14 +1,20 @@
 import { transformByFileType } from "./ast-transformer";
 import { safeLoadParser } from "./utils/version-utils";
 import { CompatPlugin, CompatParser } from "./types/prettier-compat";
+import { setPluginOptions } from "./normalizer";
+import { PluginOptions } from "./types";
 
-// Parser creation function for v3
 function createParser(parserName: string, fileType: string) {
   const baseParser = safeLoadParser(parserName, fileType);
 
   return {
     ...baseParser,
     preprocess: (text: string, options: any): string => {
+      const pluginOptions: PluginOptions = {
+        customSpacingUnit: options.customSpacingUnit,
+      };
+      setPluginOptions(pluginOptions);
+
       return transformByFileType(text, options.filepath || `file.${fileType}`);
     },
   } as CompatParser;
@@ -65,8 +71,18 @@ const plugin: CompatPlugin = {
       astFormat: "estree",
     },
   },
+
+  options: {
+    customSpacingUnit: {
+      type: "int",
+      category: "Tailwind",
+      default: 4,
+      description:
+        "Custom spacing unit in pixels (default: 4). Tailwind uses 4px as the base unit (e.g., p-1 = 4px). Change this if you've customized Tailwind's spacing scale.",
+    },
+  },
 };
 
-const { parsers, languages } = plugin;
+const { parsers, languages, options } = plugin;
 
-export { parsers, languages };
+export { parsers, languages, options };

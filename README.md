@@ -153,7 +153,73 @@ The plugin is designed to be safe and only transforms class-related attributes:
 
 ## 🔧 Configuration
 
+### Basic Configuration
+
 The plugin works out of the box with default settings. No additional configuration is required.
+
+### Custom Spacing Unit
+
+If you've customized your Tailwind CSS spacing scale, you can configure the plugin to match your custom spacing unit.
+
+By default, Tailwind uses **4px** as the base spacing unit (e.g., `p-1` = 4px, `p-2` = 8px). If you've changed this in your Tailwind configuration, you should update the `customSpacingUnit` option.
+
+**`.prettierrc.js`**
+
+```javascript
+module.exports = {
+  plugins: ["@youthfulhps/prettier-plugin-tailwindcss-normalizer"],
+  customSpacingUnit: 8, // Change to match your Tailwind spacing scale
+};
+```
+
+**`tailwind.config.js` (Example with 8px base unit)**
+
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      spacing: {
+        1: "8px", // 8px * 1
+        2: "16px", // 8px * 2
+        3: "24px", // 8px * 3
+        4: "32px", // 8px * 4
+        // ... etc
+      },
+    },
+  },
+};
+```
+
+**Tailwind CSS v4 (`global.css` or similar)**
+
+```css
+@theme {
+  --spacing: 1px;
+  /* ... etc */
+}
+```
+
+**Example with `customSpacingUnit: 8`**
+
+```jsx
+// Before
+<div className="p-[8px] m-[16px] gap-[24px]">Content</div>
+
+// After (with customSpacingUnit: 8)
+<div className="p-1 m-2 gap-3">Content</div>
+```
+
+**Example with default `customSpacingUnit: 4`**
+
+```jsx
+// Before
+<div className="p-[4px] m-[8px] gap-[12px]">Content</div>
+
+// After (with customSpacingUnit: 4)
+<div className="p-1 m-2 gap-3">Content</div>
+```
+
+See the [examples/custom-spacing](./examples/custom-spacing) directory for a complete working example.
 
 > **Note**: This plugin is optimized for Prettier v3+ and takes advantage of the new plugin architecture. If you're using Prettier v2, please upgrade to v3 or use an alternative solution.
 

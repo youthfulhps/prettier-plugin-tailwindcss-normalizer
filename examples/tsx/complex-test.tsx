@@ -14,7 +14,7 @@ function ComplexComponent() {
    */
 
   return (
-    <div className="-m-4 mx-4 min-h-screen rounded-lg p-1 px-1 px-[11px]">
+    <div className="-m-4 mx-4 -mb-4 min-h-screen rounded-lg p-1 px-1 px-3 md:-mb-3 dark:md:hover:-m-3">
       {/* Various patterns */}
       <div
         className={cx(

@@ -50,6 +50,714 @@ describe("normalizeClassName", () => {
     expect(normalizeClassName("p-[]")).toBe("p-[]");
   });
 
+  it("should normalize classes with responsive variants", () => {
+    expect(normalizeClassName("md:p-[16px]")).toBe("md:p-4");
+    expect(normalizeClassName("sm:p-[8px]")).toBe("sm:p-2");
+    expect(normalizeClassName("lg:p-[24px]")).toBe("lg:p-6");
+    expect(normalizeClassName("xl:m-[32px]")).toBe("xl:m-8");
+    expect(normalizeClassName("2xl:w-[40px]")).toBe("2xl:w-10");
+  });
+
+  it("should normalize classes with state variants", () => {
+    expect(normalizeClassName("hover:p-[16px]")).toBe("hover:p-4");
+    expect(normalizeClassName("focus:m-[8px]")).toBe("focus:m-2");
+    expect(normalizeClassName("active:px-[16px]")).toBe("active:px-4");
+    expect(normalizeClassName("disabled:py-[8px]")).toBe("disabled:py-2");
+  });
+
+  it("should normalize classes with multiple stacked variants", () => {
+    expect(normalizeClassName("md:hover:p-[16px]")).toBe("md:hover:p-4");
+    expect(normalizeClassName("dark:md:p-[8px]")).toBe("dark:md:p-2");
+    expect(normalizeClassName("lg:focus:active:m-[16px]")).toBe(
+      "lg:focus:active:m-4"
+    );
+    expect(normalizeClassName("dark:md:hover:px-[24px]")).toBe(
+      "dark:md:hover:px-6"
+    );
+  });
+
+  it("should normalize classes with variant and px suffix", () => {
+    expect(normalizeClassName("md:p-16px")).toBe("md:p-4");
+    expect(normalizeClassName("hover:m-8px")).toBe("hover:m-2");
+    expect(normalizeClassName("lg:w-32px")).toBe("lg:w-8");
+  });
+
+  it("should preserve variant when no mapping exists", () => {
+    expect(normalizeClassName("md:p-[7px]")).toBe("md:p-[7px]");
+    expect(normalizeClassName("hover:unknown-[4px]")).toBe(
+      "hover:unknown-[4px]"
+    );
+  });
+
+  it("should not change standard classes with variants", () => {
+    expect(normalizeClassName("md:p-4")).toBe("md:p-4");
+    expect(normalizeClassName("hover:bg-red-500")).toBe("hover:bg-red-500");
+    expect(normalizeClassName("lg:text-center")).toBe("lg:text-center");
+  });
+
+  it("should normalize negative values with variants", () => {
+    expect(normalizeClassName("md:-m-[16px]")).toBe("md:-m-4");
+    expect(normalizeClassName("hover:-m-[8px]")).toBe("hover:-m-2");
+    expect(normalizeClassName("lg:-mt-[24px]")).toBe("lg:-mt-6");
+    expect(normalizeClassName("dark:-mx-[16px]")).toBe("dark:-mx-4");
+  });
+
+  it("should normalize negative px suffix with variants", () => {
+    expect(normalizeClassName("md:-m-16px")).toBe("md:-m-4");
+    expect(normalizeClassName("hover:-m-8px")).toBe("hover:-m-2");
+    expect(normalizeClassName("lg:-top-24px")).toBe("lg:-top-6");
+  });
+
+  it("should not normalize negative values for properties that don't support negative", () => {
+    // Padding, width, height, border 등은 negative가 불가능하므로 변환하지 않음
+    expect(normalizeClassName("md:-p-[16px]")).toBe("md:-p-[16px]");
+    expect(normalizeClassName("hover:-w-[8px]")).toBe("hover:-w-[8px]");
+    expect(normalizeClassName("lg:-border-[2px]")).toBe("lg:-border-[2px]");
+  });
+
+  describe("All Tailwind CSS Variants", () => {
+    describe("Responsive Variants", () => {
+      it("should normalize with sm: variant", () => {
+        expect(normalizeClassName("sm:p-[16px]")).toBe("sm:p-4");
+        expect(normalizeClassName("sm:m-[8px]")).toBe("sm:m-2");
+        expect(normalizeClassName("sm:w-[32px]")).toBe("sm:w-8");
+      });
+
+      it("should normalize with md: variant", () => {
+        expect(normalizeClassName("md:p-[16px]")).toBe("md:p-4");
+        expect(normalizeClassName("md:px-[24px]")).toBe("md:px-6");
+        expect(normalizeClassName("md:py-[32px]")).toBe("md:py-8");
+      });
+
+      it("should normalize with lg: variant", () => {
+        expect(normalizeClassName("lg:p-[16px]")).toBe("lg:p-4");
+        expect(normalizeClassName("lg:m-[40px]")).toBe("lg:m-10");
+        expect(normalizeClassName("lg:h-[48px]")).toBe("lg:h-12");
+      });
+
+      it("should normalize with xl: variant", () => {
+        expect(normalizeClassName("xl:p-[16px]")).toBe("xl:p-4");
+        expect(normalizeClassName("xl:w-[64px]")).toBe("xl:w-16");
+      });
+
+      it("should normalize with 2xl: variant", () => {
+        expect(normalizeClassName("2xl:p-[16px]")).toBe("2xl:p-4");
+        expect(normalizeClassName("2xl:m-[80px]")).toBe("2xl:m-20");
+      });
+    });
+
+    describe("Pseudo-Class Variants - Interaction States", () => {
+      it("should normalize with hover: variant", () => {
+        expect(normalizeClassName("hover:p-[16px]")).toBe("hover:p-4");
+        expect(normalizeClassName("hover:m-[8px]")).toBe("hover:m-2");
+        expect(normalizeClassName("hover:w-[32px]")).toBe("hover:w-8");
+      });
+
+      it("should normalize with focus: variant", () => {
+        expect(normalizeClassName("focus:p-[16px]")).toBe("focus:p-4");
+        expect(normalizeClassName("focus:px-[24px]")).toBe("focus:px-6");
+        expect(normalizeClassName("focus:ring-[2px]")).toBe("focus:ring-2");
+      });
+
+      it("should normalize with focus-within: variant", () => {
+        expect(normalizeClassName("focus-within:p-[16px]")).toBe(
+          "focus-within:p-4"
+        );
+        expect(normalizeClassName("focus-within:m-[8px]")).toBe(
+          "focus-within:m-2"
+        );
+      });
+
+      it("should normalize with focus-visible: variant", () => {
+        expect(normalizeClassName("focus-visible:p-[16px]")).toBe(
+          "focus-visible:p-4"
+        );
+        expect(normalizeClassName("focus-visible:outline-[2px]")).toBe(
+          "focus-visible:outline-2"
+        );
+      });
+
+      it("should normalize with active: variant", () => {
+        expect(normalizeClassName("active:p-[16px]")).toBe("active:p-4");
+        expect(normalizeClassName("active:scale-[0.95]")).toBe(
+          "active:scale-95"
+        );
+      });
+
+      it("should normalize with visited: variant", () => {
+        expect(normalizeClassName("visited:text-[16px]")).toBe(
+          "visited:text-base"
+        );
+        expect(normalizeClassName("visited:p-[8px]")).toBe("visited:p-2");
+      });
+
+      it("should normalize with target: variant", () => {
+        expect(normalizeClassName("target:p-[16px]")).toBe("target:p-4");
+        expect(normalizeClassName("target:bg-[#f0f0f0]")).toBe(
+          "target:bg-[#f0f0f0]"
+        );
+      });
+    });
+
+    describe("Pseudo-Class Variants - Structural Selectors", () => {
+      it("should normalize with first: variant", () => {
+        expect(normalizeClassName("first:p-[16px]")).toBe("first:p-4");
+        expect(normalizeClassName("first:mt-[8px]")).toBe("first:mt-2");
+      });
+
+      it("should normalize with last: variant", () => {
+        expect(normalizeClassName("last:p-[16px]")).toBe("last:p-4");
+        expect(normalizeClassName("last:mb-[8px]")).toBe("last:mb-2");
+      });
+
+      it("should normalize with only: variant", () => {
+        expect(normalizeClassName("only:p-[16px]")).toBe("only:p-4");
+        expect(normalizeClassName("only:m-[8px]")).toBe("only:m-2");
+      });
+
+      it("should normalize with odd: variant", () => {
+        expect(normalizeClassName("odd:p-[16px]")).toBe("odd:p-4");
+        expect(normalizeClassName("odd:bg-[#f0f0f0]")).toBe("odd:bg-[#f0f0f0]");
+      });
+
+      it("should normalize with even: variant", () => {
+        expect(normalizeClassName("even:p-[16px]")).toBe("even:p-4");
+        expect(normalizeClassName("even:bg-[#f5f5f5]")).toBe(
+          "even:bg-[#f5f5f5]"
+        );
+      });
+
+      it("should normalize with first-of-type: variant", () => {
+        expect(normalizeClassName("first-of-type:p-[16px]")).toBe(
+          "first-of-type:p-4"
+        );
+      });
+
+      it("should normalize with last-of-type: variant", () => {
+        expect(normalizeClassName("last-of-type:p-[16px]")).toBe(
+          "last-of-type:p-4"
+        );
+      });
+
+      it("should normalize with only-of-type: variant", () => {
+        expect(normalizeClassName("only-of-type:p-[16px]")).toBe(
+          "only-of-type:p-4"
+        );
+      });
+    });
+
+    describe("Pseudo-Class Variants - Form States", () => {
+      it("should normalize with disabled: variant", () => {
+        expect(normalizeClassName("disabled:p-[16px]")).toBe("disabled:p-4");
+        expect(normalizeClassName("disabled:opacity-[0.5]")).toBe(
+          "disabled:opacity-50"
+        );
+      });
+
+      it("should normalize with enabled: variant", () => {
+        expect(normalizeClassName("enabled:p-[16px]")).toBe("enabled:p-4");
+      });
+
+      it("should normalize with checked: variant", () => {
+        expect(normalizeClassName("checked:p-[16px]")).toBe("checked:p-4");
+        expect(normalizeClassName("checked:bg-[#3b82f6]")).toBe(
+          "checked:bg-[#3b82f6]"
+        );
+      });
+
+      it("should normalize with indeterminate: variant", () => {
+        expect(normalizeClassName("indeterminate:p-[16px]")).toBe(
+          "indeterminate:p-4"
+        );
+      });
+
+      it("should normalize with default: variant", () => {
+        expect(normalizeClassName("default:p-[16px]")).toBe("default:p-4");
+      });
+
+      it("should normalize with required: variant", () => {
+        expect(normalizeClassName("required:p-[16px]")).toBe("required:p-4");
+        expect(normalizeClassName("required:border-[2px]")).toBe(
+          "required:border-2"
+        );
+      });
+
+      it("should normalize with optional: variant", () => {
+        expect(normalizeClassName("optional:p-[16px]")).toBe("optional:p-4");
+      });
+
+      it("should normalize with valid: variant", () => {
+        expect(normalizeClassName("valid:p-[16px]")).toBe("valid:p-4");
+        expect(normalizeClassName("valid:border-[#10b981]")).toBe(
+          "valid:border-[#10b981]"
+        );
+      });
+
+      it("should normalize with invalid: variant", () => {
+        expect(normalizeClassName("invalid:p-[16px]")).toBe("invalid:p-4");
+        expect(normalizeClassName("invalid:border-[#ef4444]")).toBe(
+          "invalid:border-[#ef4444]"
+        );
+      });
+
+      it("should normalize with user-valid: variant", () => {
+        expect(normalizeClassName("user-valid:p-[16px]")).toBe(
+          "user-valid:p-4"
+        );
+      });
+
+      it("should normalize with user-invalid: variant", () => {
+        expect(normalizeClassName("user-invalid:p-[16px]")).toBe(
+          "user-invalid:p-4"
+        );
+      });
+
+      it("should normalize with in-range: variant", () => {
+        expect(normalizeClassName("in-range:p-[16px]")).toBe("in-range:p-4");
+      });
+
+      it("should normalize with out-of-range: variant", () => {
+        expect(normalizeClassName("out-of-range:p-[16px]")).toBe(
+          "out-of-range:p-4"
+        );
+      });
+
+      it("should normalize with placeholder-shown: variant", () => {
+        expect(normalizeClassName("placeholder-shown:p-[16px]")).toBe(
+          "placeholder-shown:p-4"
+        );
+      });
+
+      it("should normalize with autofill: variant", () => {
+        expect(normalizeClassName("autofill:p-[16px]")).toBe("autofill:p-4");
+      });
+
+      it("should normalize with read-only: variant", () => {
+        expect(normalizeClassName("read-only:p-[16px]")).toBe("read-only:p-4");
+      });
+
+      it("should normalize with read-write: variant", () => {
+        expect(normalizeClassName("read-write:p-[16px]")).toBe(
+          "read-write:p-4"
+        );
+      });
+    });
+
+    describe("Pseudo-Class Variants - Other States", () => {
+      it("should normalize with empty: variant", () => {
+        expect(normalizeClassName("empty:p-[16px]")).toBe("empty:p-4");
+      });
+
+      it("should normalize with open: variant", () => {
+        expect(normalizeClassName("open:p-[16px]")).toBe("open:p-4");
+      });
+
+      it("should normalize with closed: variant", () => {
+        expect(normalizeClassName("closed:p-[16px]")).toBe("closed:p-4");
+      });
+
+      it("should normalize with inert: variant", () => {
+        expect(normalizeClassName("inert:p-[16px]")).toBe("inert:p-4");
+      });
+    });
+
+    describe("Pseudo-Element Variants", () => {
+      it("should normalize with before: variant", () => {
+        expect(normalizeClassName("before:p-[16px]")).toBe("before:p-4");
+        expect(normalizeClassName("before:w-[8px]")).toBe("before:w-2");
+      });
+
+      it("should normalize with after: variant", () => {
+        expect(normalizeClassName("after:p-[16px]")).toBe("after:p-4");
+        expect(normalizeClassName("after:content-['*']")).toBe(
+          "after:content-['*']"
+        );
+      });
+
+      it("should normalize with placeholder: variant", () => {
+        expect(normalizeClassName("placeholder:text-[14px]")).toBe(
+          "placeholder:text-sm"
+        );
+        expect(normalizeClassName("placeholder:opacity-[0.5]")).toBe(
+          "placeholder:opacity-50"
+        );
+      });
+
+      it("should normalize with file: variant", () => {
+        expect(normalizeClassName("file:p-[16px]")).toBe("file:p-4");
+        expect(normalizeClassName("file:px-[12px]")).toBe("file:px-3");
+      });
+
+      it("should normalize with marker: variant", () => {
+        expect(normalizeClassName("marker:text-[16px]")).toBe(
+          "marker:text-base"
+        );
+        expect(normalizeClassName("marker:text-[#3b82f6]")).toBe(
+          "marker:text-[#3b82f6]"
+        );
+      });
+
+      it("should normalize with selection: variant", () => {
+        expect(normalizeClassName("selection:bg-[#3b82f6]")).toBe(
+          "selection:bg-[#3b82f6]"
+        );
+        expect(normalizeClassName("selection:text-[#ffffff]")).toBe(
+          "selection:text-[#ffffff]"
+        );
+      });
+
+      it("should normalize with first-line: variant", () => {
+        expect(normalizeClassName("first-line:text-[18px]")).toBe(
+          "first-line:text-lg"
+        );
+      });
+
+      it("should normalize with first-letter: variant", () => {
+        expect(normalizeClassName("first-letter:text-[24px]")).toBe(
+          "first-letter:text-2xl"
+        );
+      });
+
+      it("should normalize with backdrop: variant", () => {
+        expect(normalizeClassName("backdrop:bg-[rgba(0,0,0,0.5)]")).toBe(
+          "backdrop:bg-[rgba(0,0,0,0.5)]"
+        );
+        expect(normalizeClassName("backdrop:blur-[8px]")).toBe("backdrop:blur");
+        expect(normalizeClassName("backdrop:blur-[4px]")).toBe(
+          "backdrop:blur-sm"
+        );
+        expect(normalizeClassName("backdrop:blur-[16px]")).toBe(
+          "backdrop:blur-lg"
+        );
+      });
+    });
+
+    describe("Dark Mode & Theme Variants", () => {
+      it("should normalize with dark: variant", () => {
+        expect(normalizeClassName("dark:p-[16px]")).toBe("dark:p-4");
+        expect(normalizeClassName("dark:bg-[#1f2937]")).toBe(
+          "dark:bg-[#1f2937]"
+        );
+        expect(normalizeClassName("dark:text-[#ffffff]")).toBe(
+          "dark:text-[#ffffff]"
+        );
+      });
+
+      it("should normalize with theme-{name}: variant", () => {
+        expect(normalizeClassName("theme-midnight:p-[16px]")).toBe(
+          "theme-midnight:p-4"
+        );
+        expect(normalizeClassName("theme-ocean:p-[16px]")).toBe(
+          "theme-ocean:p-4"
+        );
+      });
+    });
+
+    describe("Group Variants", () => {
+      it("should normalize with group-hover: variant", () => {
+        expect(normalizeClassName("group-hover:p-[16px]")).toBe(
+          "group-hover:p-4"
+        );
+        expect(normalizeClassName("group-hover:text-[#3b82f6]")).toBe(
+          "group-hover:text-[#3b82f6]"
+        );
+      });
+
+      it("should normalize with group-focus: variant", () => {
+        expect(normalizeClassName("group-focus:p-[16px]")).toBe(
+          "group-focus:p-4"
+        );
+        expect(normalizeClassName("group-focus:ring-[2px]")).toBe(
+          "group-focus:ring-2"
+        );
+      });
+
+      it("should normalize with group-active: variant", () => {
+        expect(normalizeClassName("group-active:p-[16px]")).toBe(
+          "group-active:p-4"
+        );
+      });
+    });
+
+    describe("Peer Variants", () => {
+      it("should normalize with peer-hover: variant", () => {
+        expect(normalizeClassName("peer-hover:p-[16px]")).toBe(
+          "peer-hover:p-4"
+        );
+      });
+
+      it("should normalize with peer-focus: variant", () => {
+        expect(normalizeClassName("peer-focus:p-[16px]")).toBe(
+          "peer-focus:p-4"
+        );
+      });
+
+      it("should normalize with peer-checked: variant", () => {
+        expect(normalizeClassName("peer-checked:p-[16px]")).toBe(
+          "peer-checked:p-4"
+        );
+        expect(normalizeClassName("peer-checked:bg-[#3b82f6]")).toBe(
+          "peer-checked:bg-[#3b82f6]"
+        );
+      });
+
+      it("should normalize with peer-invalid: variant", () => {
+        expect(normalizeClassName("peer-invalid:p-[16px]")).toBe(
+          "peer-invalid:p-4"
+        );
+      });
+
+      it("should normalize with peer-required: variant", () => {
+        expect(normalizeClassName("peer-required:p-[16px]")).toBe(
+          "peer-required:p-4"
+        );
+      });
+
+      it("should normalize with peer-has-{selector}: variant", () => {
+        expect(normalizeClassName("peer-has-[input:focus]:p-[16px]")).toBe(
+          "peer-has-[input:focus]:p-4"
+        );
+      });
+    });
+
+    describe("Has & Not Variants", () => {
+      it("should normalize with has-{selector}: variant", () => {
+        expect(normalizeClassName("has-[input:focus]:p-[16px]")).toBe(
+          "has-[input:focus]:p-4"
+        );
+        expect(normalizeClassName("has-[.child]:p-[16px]")).toBe(
+          "has-[.child]:p-4"
+        );
+      });
+
+      it("should normalize with not-{selector}: variant", () => {
+        expect(normalizeClassName("not-[disabled]:p-[16px]")).toBe(
+          "not-[disabled]:p-4"
+        );
+        expect(normalizeClassName("not-[.hidden]:p-[16px]")).toBe(
+          "not-[.hidden]:p-4"
+        );
+      });
+    });
+
+    describe("ARIA Variants", () => {
+      it("should normalize with aria-checked: variant", () => {
+        expect(normalizeClassName("aria-checked:p-[16px]")).toBe(
+          "aria-checked:p-4"
+        );
+      });
+
+      it("should normalize with aria-disabled: variant", () => {
+        expect(normalizeClassName("aria-disabled:p-[16px]")).toBe(
+          "aria-disabled:p-4"
+        );
+      });
+
+      it("should normalize with aria-expanded: variant", () => {
+        expect(normalizeClassName("aria-expanded:p-[16px]")).toBe(
+          "aria-expanded:p-4"
+        );
+      });
+
+      it("should normalize with aria-hidden: variant", () => {
+        expect(normalizeClassName("aria-hidden:p-[16px]")).toBe(
+          "aria-hidden:p-4"
+        );
+      });
+
+      it("should normalize with aria-invalid: variant", () => {
+        expect(normalizeClassName("aria-invalid:p-[16px]")).toBe(
+          "aria-invalid:p-4"
+        );
+      });
+
+      it("should normalize with aria-pressed: variant", () => {
+        expect(normalizeClassName("aria-pressed:p-[16px]")).toBe(
+          "aria-pressed:p-4"
+        );
+      });
+
+      it("should normalize with aria-readonly: variant", () => {
+        expect(normalizeClassName("aria-readonly:p-[16px]")).toBe(
+          "aria-readonly:p-4"
+        );
+      });
+
+      it("should normalize with aria-required: variant", () => {
+        expect(normalizeClassName("aria-required:p-[16px]")).toBe(
+          "aria-required:p-4"
+        );
+      });
+
+      it("should normalize with aria-selected: variant", () => {
+        expect(normalizeClassName("aria-selected:p-[16px]")).toBe(
+          "aria-selected:p-4"
+        );
+      });
+    });
+
+    describe("Data Attributes Variants", () => {
+      it("should normalize with data-{name}: variant", () => {
+        expect(normalizeClassName("data-[status=active]:p-[16px]")).toBe(
+          "data-[status=active]:p-4"
+        );
+        expect(normalizeClassName("data-active:p-[16px]")).toBe(
+          "data-active:p-4"
+        );
+        expect(normalizeClassName("data-[state=open]:p-[16px]")).toBe(
+          "data-[state=open]:p-4"
+        );
+      });
+    });
+
+    describe("Media Query Variants", () => {
+      it("should normalize with portrait: variant", () => {
+        expect(normalizeClassName("portrait:p-[16px]")).toBe("portrait:p-4");
+      });
+
+      it("should normalize with landscape: variant", () => {
+        expect(normalizeClassName("landscape:p-[16px]")).toBe("landscape:p-4");
+      });
+
+      it("should normalize with motion-safe: variant", () => {
+        expect(normalizeClassName("motion-safe:p-[16px]")).toBe(
+          "motion-safe:p-4"
+        );
+      });
+
+      it("should normalize with motion-reduce: variant", () => {
+        expect(normalizeClassName("motion-reduce:p-[16px]")).toBe(
+          "motion-reduce:p-4"
+        );
+      });
+
+      it("should normalize with contrast-more: variant", () => {
+        expect(normalizeClassName("contrast-more:p-[16px]")).toBe(
+          "contrast-more:p-4"
+        );
+      });
+
+      it("should normalize with forced-colors: variant", () => {
+        expect(normalizeClassName("forced-colors:p-[16px]")).toBe(
+          "forced-colors:p-4"
+        );
+      });
+
+      it("should normalize with not-forced-colors: variant", () => {
+        expect(normalizeClassName("not-forced-colors:p-[16px]")).toBe(
+          "not-forced-colors:p-4"
+        );
+      });
+
+      it("should normalize with inverted-colors: variant", () => {
+        expect(normalizeClassName("inverted-colors:p-[16px]")).toBe(
+          "inverted-colors:p-4"
+        );
+      });
+
+      it("should normalize with pointer-coarse: variant", () => {
+        expect(normalizeClassName("pointer-coarse:p-[16px]")).toBe(
+          "pointer-coarse:p-4"
+        );
+      });
+
+      it("should normalize with pointer-fine: variant", () => {
+        expect(normalizeClassName("pointer-fine:p-[16px]")).toBe(
+          "pointer-fine:p-4"
+        );
+      });
+
+      it("should normalize with print: variant", () => {
+        expect(normalizeClassName("print:p-[16px]")).toBe("print:p-4");
+      });
+
+      it("should normalize with supports-{feature}: variant", () => {
+        expect(normalizeClassName("supports-backdrop-filter:p-[16px]")).toBe(
+          "supports-backdrop-filter:p-4"
+        );
+        expect(normalizeClassName("supports-grid:p-[16px]")).toBe(
+          "supports-grid:p-4"
+        );
+      });
+    });
+
+    describe("Direction Variants", () => {
+      it("should normalize with ltr: variant", () => {
+        expect(normalizeClassName("ltr:p-[16px]")).toBe("ltr:p-4");
+        expect(normalizeClassName("ltr:ml-[8px]")).toBe("ltr:ml-2");
+      });
+
+      it("should normalize with rtl: variant", () => {
+        expect(normalizeClassName("rtl:p-[16px]")).toBe("rtl:p-4");
+        expect(normalizeClassName("rtl:mr-[8px]")).toBe("rtl:mr-2");
+      });
+    });
+
+    describe("Arbitrary Variants", () => {
+      it("should normalize with arbitrary selector variants", () => {
+        expect(normalizeClassName("[&:nth-child(3)]:p-[16px]")).toBe(
+          "[&:nth-child(3)]:p-4"
+        );
+        expect(normalizeClassName("[&_input:focus]:p-[16px]")).toBe(
+          "[&_input:focus]:p-4"
+        );
+        expect(normalizeClassName("[&>div]:p-[16px]")).toBe("[&>div]:p-4");
+      });
+    });
+
+    describe("Stacked Variants (Multiple variants combined)", () => {
+      it("should normalize with responsive + state variants", () => {
+        expect(normalizeClassName("md:hover:p-[16px]")).toBe("md:hover:p-4");
+        expect(normalizeClassName("lg:focus:p-[16px]")).toBe("lg:focus:p-4");
+        expect(normalizeClassName("xl:active:p-[16px]")).toBe("xl:active:p-4");
+      });
+
+      it("should normalize with dark + responsive variants", () => {
+        expect(normalizeClassName("dark:md:p-[16px]")).toBe("dark:md:p-4");
+        expect(normalizeClassName("dark:lg:p-[16px]")).toBe("dark:lg:p-4");
+      });
+
+      it("should normalize with dark + state variants", () => {
+        expect(normalizeClassName("dark:hover:p-[16px]")).toBe(
+          "dark:hover:p-4"
+        );
+        expect(normalizeClassName("dark:focus:p-[16px]")).toBe(
+          "dark:focus:p-4"
+        );
+      });
+
+      it("should normalize with responsive + dark + state variants", () => {
+        expect(normalizeClassName("md:dark:hover:p-[16px]")).toBe(
+          "md:dark:hover:p-4"
+        );
+        expect(normalizeClassName("lg:dark:focus:p-[16px]")).toBe(
+          "lg:dark:focus:p-4"
+        );
+      });
+
+      it("should normalize with group + state variants", () => {
+        expect(normalizeClassName("group-hover:focus:p-[16px]")).toBe(
+          "group-hover:focus:p-4"
+        );
+      });
+
+      it("should normalize with peer + state variants", () => {
+        expect(normalizeClassName("peer-checked:hover:p-[16px]")).toBe(
+          "peer-checked:hover:p-4"
+        );
+      });
+
+      it("should normalize complex stacked variants", () => {
+        expect(normalizeClassName("dark:md:hover:focus:p-[16px]")).toBe(
+          "dark:md:hover:focus:p-4"
+        );
+        expect(normalizeClassName("lg:dark:group-hover:active:p-[16px]")).toBe(
+          "lg:dark:group-hover:active:p-4"
+        );
+      });
+    });
+  });
+
   it("should normalize px suffix values", () => {
     // Border px suffix
     expect(normalizeClassName("border-1px")).toBe("border");
